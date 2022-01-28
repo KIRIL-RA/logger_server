@@ -1,0 +1,45 @@
+*, *:after, *:before {
+   box-sizing: border-box;
+   padding: 0;
+   margin: 0;
+   transition: .5s ease-in-out;
+   /* добавим плавность переходов для всех элементов страницы*/
+}
+
+img {
+   display: block;
+   width: 100%;
+}
+
+.MAIN-CONTENT{
+   overflow-y: scroll;
+   opacity: 0;
+   width: 100%;
+   font-family: 'Gotham pro';
+   margin-top: 10px;
+   padding-left: 10px;
+   padding-right: 10px;
+}
+
+.LOADING{
+   width: 100vw;
+   position: absolute;
+   top: 50%;
+
+}
+
+.disable{
+   display: none;
+}
+
+.wrapper {
+   height: 100vh;
+   display: flex;
+   flex-direction: column;
+ }
+
+ .parent{
+   height: 100%;
+   display: flex;
+   flex-wrap: nowrap;
+}

@@ -1,0 +1,64 @@
+
+.DATA-BLOCK{
+    font-family: 'Gotham pro';
+    border-bottom: 1px solid #ddd;
+ }
+ 
+ .TEXT-BLOCK{
+    margin: 10px 10px 10px 5px;
+    font-size: 20px;
+    display: block;
+ }
+ 
+ .BOLD-INFO-TEXT{
+    font-weight: bold;
+ }
+
+.DEVICE-NAME-BLOCK{
+    color: black;
+    text-decoration: none;
+    text-align: center;
+}
+
+ .DEVICE-NAME-HEADER{
+    margin-top: 15px;
+    font-size: 10px;
+    display: block;
+ }
+ .DEVICE-NAME img{
+     width: auto;
+     display: inline-block;
+ }
+
+ .DEVICE-NAME{
+    font-weight: bold;
+    font-size: 30px;
+    margin-bottom: 15px;
+ }
+
+ .WORK-TIME-DATA-BLOCK{
+    padding: 5px;
+    display: flex;
+    flex-wrap: nowrap;
+ }
+
+ .WORK-DATA{
+    height: 50%;
+    width: 50%;
+    display: inline-block;
+    text-align: center;
+ }
+ 
+ .WORK-DATA span{
+    display: block;
+ }
+
+ .WORK-TIME-DATA, .PROGRAM-EXECUTION-TIME-DATA, .LASER-WORK-TIME-DATA{
+    color: rgb(100, 100, 255);
+    font-size: 20px;
+ }
+
+
+ #workGraph{
+    width: 100%;
+ }

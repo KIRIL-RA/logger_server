@@ -1,0 +1,65 @@
+header{
+   border-bottom: 1px solid #ddd;
+   padding-bottom: 5px;
+}
+
+.LOGO{
+   margin-top: 10px;
+   float: left;
+    vertical-align: middle;
+ }
+ 
+ .LOGO-IMG{
+    display: block;
+    float: left;
+    margin-left: 10px;
+ }
+ 
+ .LOGO-TEXT{
+    padding: 3px 3px 0 3px;
+    border-radius: 10px;
+    margin-left: 10px;
+    display: inline-block;
+    background-color: #38a6e4;
+ }
+ 
+ .LOGO-TEXT a{
+    color: white;
+    font-family: 'Gotham pro';
+    font-weight: bold;
+    font-size: 20px;
+ }
+ 
+ .USER{
+    text-decoration: none;
+    float: right;
+ }
+ 
+ .USER img{
+    display: inline-block;
+    width: auto;
+ }
+ 
+ .USER span{
+    font-weight: bold;
+    color: grey;
+    font-family: 'Gotham pro';
+    display: inline-block;
+    margin-bottom: 3px;            
+    top: 50%;                         
+    transform: translate(0, -50%);
+ }
+
+ .OPEN-MENU-BUTTON{
+    float: left;
+ }
+ 
+ @media (max-width: 600px){
+   .USER img{
+      margin-top: 3px;
+      margin-right: 5px;
+   }
+   #USERNAME{
+      display: none;
+   }
+}

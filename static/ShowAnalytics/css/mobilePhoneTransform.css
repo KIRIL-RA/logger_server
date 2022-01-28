@@ -1,0 +1,14 @@
+@media (max-width: 800px){
+.WORK-DATA, .WORK-TIME-DATA-BLOCK{
+       display: block;
+    }
+    .WORK-DATA{
+      text-align: left;
+       margin-bottom: 10px;
+       height: 100%;
+       width: 100%;
+    }
+    .WORK-DATA span{
+      display: inline-block;
+   }
+ }

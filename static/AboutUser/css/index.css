@@ -1,0 +1,55 @@
+*, *:after, *:before {
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+    transition: .5s ease-in-out;
+    /* добавим плавность переходов для всех элементов страницы*/
+ }
+
+*{
+    padding: 0;
+    margin: 0;
+}
+.wrapper {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+.parent{
+    height: 100%;
+    display: flex;
+    flex-wrap: nowrap;
+}
+
+.MAIN-CONTENT{
+    width: 100%;
+    font-family: 'Gotham pro';
+    margin-top: 30px;
+}
+
+.USER-INFO-TEXT-BLOCK span{
+    display: block;
+}
+
+.USER-INFO-TEXT-BLOCK{
+    text-align: center;
+    
+}
+
+.USERNAME{
+    display:inline;
+    font-size: 30px;
+    font-weight: bold;
+}
+
+.DEVICES-COUNT{
+    display: inline;
+    margin-bottom: 30px;
+}
+
+.EXIT-ACCOUNT-BUTTON{
+    text-decoration: none;
+    font-size: 30px;
+    color: red;
+    cursor: pointer;
+}

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/scripts/StaticFunctions.js"></script>
+    <script src="/ShowAnalytics/scripts/index.js"></script>
+    <link rel="stylesheet" href="/ShowAnalytics/css/index.css">
+    <link rel="stylesheet" href="/ShowAnalytics/css/showanalytics.css">
+    <link rel="stylesheet" href="/ShowAnalytics/css/mobilePhoneTransform.css">
+    <link rel="stylesheet" href="/ShowAnalytics/css/fileSelect.css">
+    <link rel="stylesheet" href="/css/sidenav.css">
+    <link rel="stylesheet" href="/css/fonts/stylesheet.css">
+    <link rel="stylesheet" href="/css/loadingAnimation.css">
+    <link rel="stylesheet" href="/css/header.css">
+    <title>LCA Cloud panel</title>
+</head>
+
+<body>
+    <div class="wrapper">
+        <header>
+            <span class="OPEN-MENU-BUTTON" style="font-size:30px;cursor:pointer">&#9776;</span>
+            <div class="LOGO">
+                <a class="LOGO-IMG"><img src="/images/Logo10.png" alt="Logo"></a>
+                <div class="LOGO-TEXT">
+                    <a>Cloud panel</a>
+                </div>
+            </div>
+            <a class="USER" href="/aboutuser">
+                <span id="USERNAME">{UserName}</span>
+                <img src="/images/User10.png" alt="UserLogo">
+            </a>
+
+        </header>
+        <div class="parent">
+            <div class="sidenav">
+                <script src="/scripts/SideBar.js"></script>
+                <a href="javascript:void(0)" class="closebtn defaultsidenavnavigation">&times;</a>
+                <a class="aboutuser defaultsidenavnavigation" href="/aboutuser">User</a>
+                <a class="devices defaultsidenavnavigation" href="/devices">Devices</a>
+                <a class="selectdate defaultsidenavnavigation" href="/analytics/selectdate">Analytics</a>
+            </div>
+            <div class="MAIN-CONTENT">
+                <a class="DATA-BLOCK DEVICE-NAME-BLOCK">
+                    <div class="DEVICE-NAME-HEADER"><span>Device name:</span></div>
+                    <div class="DEVICE-NAME"><span class="BOLD-INFO-TEXT" id="MACHINE-NAME">{Machine name}</span><img
+                            src="/images/External-reference24.png" alt="External-reference24"></div>
+                </a>
+                <div class="DATA-BLOCK">
+                    <div class="TEXT-BLOCK"><span>File name: </span><span class="BOLD-INFO-TEXT"
+                            id="FILE-NAME">20.csv</span>
+                    </div>
+                    <div class="TEXT-BLOCK"><span>Date: </span><span class="BOLD-INFO-TEXT"
+                            id="FILE-DATE">20.11.2021</span>
+                    </div>
+                    <div class="TEXT-BLOCK"><span>Time: </span><span class="BOLD-INFO-TEXT"
+                            id="FILE-TIME">00:00-15:45</span>
+                    </div>
+                </div>
+                <div class="DATA-BLOCK WORK-TIME-DATA-BLOCK">
+                    <div class="WORK-DATA WORK-TIME">
+                        <span>Work time</span>
+                        <span class="BOLD-INFO-TEXT WORK-TIME-DATA">10h 23m 11s</span>
+                    </div>
+                    <div class="WORK-DATA PROGRAM-EXECUTION-TIME">
+                        <span>Program execution time</span>
+                        <span class="BOLD-INFO-TEXT PROGRAM-EXECUTION-TIME-DATA">15% - 5h 23m 11s</span>
+                    </div>
+                    <div class="WORK-DATA LASER-WORK-TIME">
+                        <span>Laser work time</span>
+                        <span class="BOLD-INFO-TEXT LASER-WORK-TIME-DATA">15% - 5h 23m 11s</span>
+                    </div>
+                </div>
+                <div>
+                    <canvas id="workGraph"></canvas>
+                </div>
+            </div>
+            <div class="LOADING">
+                <div class="bubblingG">
+                    <span id="bubblingG_1">
+                    </span>
+                    <span id="bubblingG_2">
+                    </span>
+                    <span id="bubblingG_3">
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

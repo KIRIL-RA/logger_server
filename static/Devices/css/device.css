@@ -1,0 +1,28 @@
+table{
+    text-align: center;
+    table-layout: fixed;
+    width: 100%;
+    padding-left: 10px;
+    padding-right: 10px;
+    font-size: 20px;
+    -webkit-user-drag: 100%;
+}
+
+.device-id{
+    width: 10%;
+    font-weight: bold;
+}
+
+td{
+    padding-top: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+.show-device-logs{
+    width: 25%;
+}
+
+.show-device-logs a{
+    color: rgb(37, 37, 211);
+    text-decoration: none;
+} 

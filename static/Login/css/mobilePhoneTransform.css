@@ -1,0 +1,10 @@
+@media (max-width: 600px) {
+    .LOGIN-BLOCK{
+        height: auto;
+        width: auto;
+    }
+    .LOGIN-BLOCK input{
+        width: 50vw;
+        height: 5vh;
+    }
+}

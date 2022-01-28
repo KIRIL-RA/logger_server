@@ -1,0 +1,28 @@
+.SELECT-DEVICE{
+    display: block;
+}
+
+.SELECT-DEVICE span{
+    font-family: 'Gotham pro';
+    color: black;
+    font-size: larger;
+    font-weight: bold;
+}
+
+.SELECT-DEVICE select{
+    height: 30px;
+}
+
+.LAST-SYNC{
+    float: right;
+ }
+ 
+ .LAST-SYNC img{
+    display: inline-block;
+    width: auto;
+ }
+
+ .LAST-SYNC span{
+     display: inline-block;
+     margin-bottom: 30px;
+ }
