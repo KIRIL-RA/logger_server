@@ -3,21 +3,21 @@ const ResponseSamples = require("../сlasses/ResponseSamples");
 const StatusCodes = require("../static/StatusCodes.json");
 const { GetAnalytics } = require("../сlasses/Logic");
 const Logger = require('../сlasses/Logger');
-const DBWork = require('../сlasses/DBWork');
+const { DBWork, LCADatabase } = require('../сlasses/DBWork');
 const User = require("../сlasses/User");
 var express = require('express');
 var router = express.Router();
 
-router.get('/:year/:month/:date', (req, res, next) => {
+router.get('/:year/:month/:date', async function (req, res, next) {
     let userName = req.query.username;
-    let userHashAccess = req.query.hashaccess;
+    let userPassword = req.query.password;
     let deviceId = req.query.deviceid;
     let date = { year: req.params.year, month: req.params.month, day: req.params.date };
 
     let logger = new Logger(true);
 
     if (userName === undefined ||
-        userHashAccess === undefined ||
+        userPassword === undefined ||
         deviceId === undefined) {
         // If not all parameters were recieved send response, and stop saving file
         res.end(ResponseSamples.DefaultResponse("Not all parameters were recieved", StatusCodes.NOT_ALL_PARAMETERS_WERE_RECIEVED));
@@ -25,18 +25,18 @@ router.get('/:year/:month/:date', (req, res, next) => {
     }
 
     try {
+        await LCADatabase.Connect();
         // Trying to get analytics for choosed period 
+        let user = new User(userName, userPassword, LCADatabase);
 
-        let dbWork = new DBWork();
-        let user = new User(userName, userHashAccess, dbWork);
-
-        user.Login();
+        await user.Login();
 
         let deviceData = user.GetDeviceData(parseInt(deviceId));
         GetAnalytics(user.userData.userHash, deviceData.id, date)
-            .then(result => {
-                 res.end(ResponseSamples.ToUserAnalyticsResult(deviceData, result, StatusCodes.ANALYTICS_SUCCESFUL_SENDED));
-                })
+            .then(async function(result) {
+                await LCADatabase.CloseConnection();
+                res.end(ResponseSamples.ToUserAnalyticsResult(deviceData, result, StatusCodes.ANALYTICS_SUCCESFUL_SENDED));
+            })
             .catch(e => {
                 switch (e.name) {
                     default:
@@ -45,7 +45,7 @@ router.get('/:year/:month/:date', (req, res, next) => {
                 }
             });
     }
-    
+
     catch (e) {
         switch (e.name) {
             case new UserNotFoundError().name:
@@ -61,6 +61,8 @@ router.get('/:year/:month/:date', (req, res, next) => {
                 return;
         }
     }
+
+
 });
 
 module.exports = router;

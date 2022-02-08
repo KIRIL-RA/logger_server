@@ -2,7 +2,10 @@
   "dependencies": {
     "@juggle/resize-observer": "^3.3.1",
     "body-parser": "^1.19.1",
+    "cookie-parser": "^1.4.6",
+    "crypto": "^1.0.1",
     "express": "^4.17.2",
+    "mongodb": "^4.3.1",
     "morgan": "^1.10.0",
     "multer": "^1.4.4"
   }

@@ -3,36 +3,106 @@ const { UserLoginDataIncorrectError, UserNotFoundError, UserNotLoginedError, Use
 const DBWork = require("./DBWork");
 const { DeviceNotExistError } = require("./Exceptions/DeviceExceptions");
 
+// Get hash from string
+const cyrb53 = function (str, seed = 0) {
+    let h1 = 0xdeadbeef ^ seed, h2 = 0x41c6ce57 ^ seed;
+    for (let i = 0, ch; i < str.length; i++) {
+        ch = str.charCodeAt(i);
+        h1 = Math.imul(h1 ^ ch, 2654435761);
+        h2 = Math.imul(h2 ^ ch, 1597334677);
+    }
+    h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+    h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+    return 4294967296 * (2097151 & h2) + (h1 >>> 0);
+};
+
 class User {
 
     /**
      * Actions with user. Contains infromations of user, function for work with user.
-     * @param {string} userName 
-     * @param {string} hashAccess 
      * @param {DBWork} dbWork
      */
-    constructor(userName, hashAccess, dbWork) {
-        if (userName === undefined || hashAccess === undefined || dbWork === undefined) throw new NotAllParametersWereRecievedError("You must specify all parameters");
-        if (userName === null || hashAccess === null || dbWork === null) throw new NotAllParametersWereRecievedError("You must specify all parameters");
+    constructor(dbWork) {
+        if (dbWork === undefined || dbWork === null) throw new NotAllParametersWereRecievedError("You must specify all parameters");
 
-        this.userData = {
-            userName: userName,
-            hashAccess: hashAccess,
-        }
         this.dbWork = dbWork;
         this.isUserLogined = false;
     }
 
     /**
-     * Loggining user.
-     * Throw UserLoginDataIncorrectError if login failed, beause entered data incorrect.
-     * Throw TypeError if login incorrect for other reasons.
+     * Get info about device
+     * @param {number} deviceId 
+     * @returns deviceData
      */
-    Login() {
+    GetDeviceData(deviceId) {
+        if (!this.isUserLogined) throw new UserNotLoginedError("User not logined");
+        let devices = this.userData.devices;
+        let deviceData;
+
+        // Check, is user has any devices
+        if (devices.length == 0 || devices === undefined || devices === null) throw new UserHasNoDevicesError("User has no devices");
+
+        // Finding device by id
+        devices.forEach(device => {
+            if (device.id === deviceId) deviceData = device;
+        });
+
+        if (deviceData !== undefined) return deviceData;
+
+        // If device not found in user devices, throw exception
+        throw new DeviceNotExistError("Device not exist, or not belongs to user");
+    }
+
+    /**
+     * Getting info about user
+     * @returns List contains userdata
+     */
+    GetUserData() {
+        if (!this.isUserLogined) throw new UserNotLoginedError("User not logined");
+
+        let CloneObject = (fromArray, toArray) => {
+            for (let key in fromArray) toArray[key] = fromArray[key];
+        };
+
+        let userData = {};
+        CloneObject(this.userData, userData);
+
+        delete userData.password;
+        delete userData.password;
+
+        return userData;
+    }
+}
+
+class UserWithToke{
+    
+}
+
+class UserWithPassword extends User {
+
+    constructor(userName, password, dbWork) {
+        if (userName === undefined || password === undefined || dbWork === undefined) throw new NotAllParametersWereRecievedError("You must specify all parameters");
+        if (userName === null || password === null || dbWork === null) throw new NotAllParametersWereRecievedError("You must specify all parameters");
+
+        super(dbWork);
+
+        this.userData = {
+            userName: userName,
+            password: password,
+        }
+    }
+
+    /**
+         * Loggining user.
+         * Throw UserLoginDataIncorrectError if login failed, beause entered data incorrect.
+         * Throw TypeError if login incorrect for other reasons.
+         */
+    async Login() {
         let dbWork = this.dbWork;
         try {
-            let userData = dbWork.GetUserData(this.userData.userName);
-            if (userData.userName !== this.userData.userName || userData.hashAccess !== this.userData.hashAccess) throw new UserLoginDataIncorrectError("User login failed, data incorrected");
+            let userData = await dbWork.GetUserData(this.userData.userName);
+            
+            if (userData.userName !== this.userData.userName || userData.password !== this.userData.password) throw new UserLoginDataIncorrectError("User login failed, data incorrected");
             this.userData = userData;
             this.isUserLogined = true;
 
@@ -53,48 +123,32 @@ class User {
     }
 
     /**
-     * Get info about device
-     * @param {number} deviceId 
-     * @returns deviceData
+     * Creating new session and generate session token
+     * @returns sessionToken
      */
-    GetDeviceData(deviceId){
-        if(!this.isUserLogined) throw new UserNotLoginedError("User no logined");
-        let devices = this.userData.devices;
-        let deviceData;
+    async CreateNewSession() {
+        if (!this.isUserLogined) throw new UserNotLoginedError("User not logined"); // Check is user logined
 
-        // Check, is user has any devices
-        if(devices.length == 0 || devices === undefined || devices === null) throw new UserHasNoDevicesError("User has no devices");
+        // Variables
+        let dbWork = this.dbWork;
+        let date_ob = new Date();
 
-        // Finding device by id
-        devices.forEach(device =>{
-            if(device.id === deviceId) deviceData = device;
-        });
+        // Get date 
+        let date = ("0" + date_ob.getDate()).slice(-2);
+        let month = ("0" + (date_ob.getMonth() + 1)).slice(-2);
+        let year = date_ob.getFullYear();
+        let hours = date_ob.getHours();
+        let minutes = date_ob.getMinutes();
+        let seconds = date_ob.getSeconds();
 
-        if(deviceData !== undefined) return deviceData;
+        // Generate session token
+        let stringToHash = date + month + year + hours + minutes + seconds + this.userData.userName;
+        let sessionToken = cyrb53(stringToHash);
 
-        // If device not found in user devices, throw exception
-        throw new DeviceNotExistError("Device not exist, or not belongs to user");
-    }
-
-    /**
-     * Getting info about user
-     * @returns List contains userdata
-     */
-    GetUserData(){
-        if(!this.isUserLogined) throw new UserNotLoginedError("User no logined");
-
-        let CloneObject = (fromArray, toArray) =>{
-            for(let key in fromArray) toArray[key] = fromArray[key];
-        };
-
-        let userData = {};
-        CloneObject(this.userData, userData);
-
-        delete userData.hashAccess;
-        delete userData.password;
-
-        return userData;
+        // Save session token
+        await dbWork.AddNewUserSession(this.userData.userHash, sessionToken);
+        this.userData.sessionToken = sessionToken;
     }
 }
 
-module.exports = User;
+module.exports = { UserWithPassword };

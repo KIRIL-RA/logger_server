@@ -1,5 +1,5 @@
 const Logger = require('../сlasses/Logger');
-const DBWork = require('../сlasses/DBWork');
+const {DBWork, LCADatabase} = require('../сlasses/DBWork');
 const Device = require('../сlasses/Device');
 const { DeviceLoginDataIncorrectError, DeviceNotExistError  } = require("../сlasses/Exceptions/DeviceExceptions");
 const ResponseSamples = require("../сlasses/ResponseSamples");
@@ -31,8 +31,8 @@ router.post('/', (req, res, next) => {
     try {
         // Trying to check file synchronization
 
-        let dbWork = new DBWork();
-        let device = new Device(parseInt(deviceId), deviceHashAccess, dbWork);
+        LCADatabase.Connect();
+        let device = new Device(parseInt(deviceId), deviceHashAccess, LCADatabase);
 
         device.Login();
 

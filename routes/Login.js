@@ -1,33 +1,42 @@
 const { UserLoginDataIncorrectError, UserNotFoundError } = require("../сlasses/Exceptions/UserExceptions");
 const ResponseSamples = require("../сlasses/ResponseSamples");
 const StatusCodes = require("../static/StatusCodes.json");
-const DBWork = require('../сlasses/DBWork');
-const User = require("../сlasses/User");
+const { DBWork, LCADatabase } = require('../сlasses/DBWork');
+const { UserWithPassword } = require("../сlasses/User");
 var express = require('express');
 var router = express.Router();
 
-router.get('/', (req, res, next) => {
+router.get('/', async function (req, res, next) {
     let userName = req.query.username;
-    let userHashAccess = req.query.hashaccess;
+    let userPassword = req.query.password;
 
     if (userName === undefined ||
-        userHashAccess === undefined) {
+        userPassword === undefined) {
         // If not all parameters were recieved send response, and stop saving file
         res.end(ResponseSamples.DefaultResponse("Not all parameters were recieved", StatusCodes.NOT_ALL_PARAMETERS_WERE_RECIEVED));
         return;
     }
 
-    // Check is user exist and logindata correct
+    // Check is user exist and login data correct
     try {
-        let dbWork = new DBWork();
-        let user = new User(userName, userHashAccess, dbWork);
+        // Connecting to DB and create user copy
+        await LCADatabase.Connect();
+        let user = new UserWithPassword(userName, userPassword, LCADatabase);
 
-        user.Login();
+        await user.Login();
+        await user.CreateNewSession();
 
-        res.end(ResponseSamples.DefaultResponse("User login succesful", StatusCodes.USER_LOGIN_SUCCESFUL));
+        await LCADatabase.CloseConnection();
+
+        let userData = user.GetUserData();
+        
+        res.cookie('sessionToken', userData.sessionToken, { maxAge: 900000, httpOnly: true });
+        res.cookie('userHash', userData.userHash, { maxAge: 900000, httpOnly: true });
+        res.end(ResponseSamples.DefaultResponse("Sucessfully logined", StatusCodes.USER_LOGINED_SUCCESSFUL_WITH_PASSWORD));
         return;
     }
-    
+
+    // Catching errors
     catch (e) {
         switch (e.name) {
             case new UserNotFoundError().name:
