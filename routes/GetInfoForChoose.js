@@ -1,7 +1,7 @@
 var { GetExistLogs } = require("../сlasses/Logic");
-const DBWork = require('../сlasses/DBWork');
+const { DBWork, LCADatabase } = require('../сlasses/DBWork');
 const Logger = require('../сlasses/Logger');
-const User = require("../сlasses/User");
+const { UserWithToken } = require("../сlasses/User");
 const ResponseSamples = require("../сlasses/ResponseSamples");
 var express = require('express');
 const { UserLoginDataIncorrectError, UserNotFoundError } = require("../сlasses/Exceptions/UserExceptions");
@@ -9,29 +9,29 @@ const StatusCodes = require("../static/StatusCodes.json");
 
 var router = express.Router();
 
-router.get('/', (req, res, next) => {
-    let userName = req.query.username;
-    let userHashAccess = req.query.hashaccess;
+router.get('/', async function (req, res, next) {
+    let userHash = req.cookies.userHash;
+    let sessionToken = req.cookies.sessionToken;
 
     let logger = new Logger(true);
 
-    if (userName === undefined ||
-        userHashAccess === undefined) {
+    if (userHash === undefined ||
+        sessionToken === undefined) {
         // If not all parameters were recieved send response, and stop saving file
         res.end(ResponseSamples.DefaultResponse("Not all parameters were recieved", StatusCodes.NOT_ALL_PARAMETERS_WERE_RECIEVED));
         return;
     }
 
     try {
+        await LCADatabase.Connect();
         // Trying to get info about devices and their logs
         let devicesData = [];
 
-        let dbWork = new DBWork();
-        let user = new User(userName, userHashAccess, dbWork);
+        let user = new UserWithToken(userHash, sessionToken, LCADatabase);
 
-        user.Login();
+        await user.Login();
 
-        let userData = user.userData;
+        let userData = user.GetUserData();
         let userDevices = userData.devices;
 
         // Formong array, contains devices info and their logs
@@ -39,6 +39,7 @@ router.get('/', (req, res, next) => {
             devicesData.push({'name' : device.name, 'id': device.id, 'lastSynchronization': device.lastSync, 'logs' : GetExistLogs(user.userData.userHash, device.id)});
         });
 
+        await LCADatabase.CloseConnection();
         res.end(ResponseSamples.ToUserInfoForChoose(devicesData, StatusCodes.SUCCESFUL_SENDED_INFO_FO_CHOOSE));
         return;
     }

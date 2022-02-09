@@ -28,16 +28,16 @@ class DBWork {
 
     /**
      * Searching user in DB.
-     * @param {string} userName 
+     * @param {any} searchParameters 
      * @returns User data if user exist.
      */
-    async GetUserData(userName) {
+    async GetUserData(searchParameters) {
         let userExist = false;
         let userData;
 
         const datataBase = this.mongoClient.db("LCA");
         const collection = datataBase.collection("USERS");
-        const results = await collection.find({ userName: userName }).toArray();
+        const results = await collection.find(searchParameters).toArray();
         if (results.length != 0) {
             userExist = true;
             userData = results[0];
@@ -51,8 +51,8 @@ class DBWork {
         if ((userHash == undefined || sessionToken == undefined) || (userHash == undefined || sessionToken == undefined)) throw new NotAllParametersWereRecievedError("Not all parameters were recieved"); // Check,  is all parameters were recieved
 
         const datataBase = this.mongoClient.db("LCA");
-        const collection = datataBase.collection("ACTIVE_SESSIONS");
-        await collection.updateOne({ userHash: userHash }, {$push: { activeSessionsTokens: sessionToken}});
+        const collection = datataBase.collection("USERS");
+        await collection.updateOne({ userHash: userHash }, {$push: { activeSessions: sessionToken}});
     }
 
     /**

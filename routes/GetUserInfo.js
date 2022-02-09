@@ -1,17 +1,19 @@
 const { UserLoginDataIncorrectError, UserNotFoundError } = require("../сlasses/Exceptions/UserExceptions");
 const ResponseSamples = require("../сlasses/ResponseSamples");
 const StatusCodes = require("../static/StatusCodes.json");
-const DBWork = require('../сlasses/DBWork');
-const User = require("../сlasses/User");
+const { DBWork, LCADatabase } = require('../сlasses/DBWork');
+const { UserWithToken } = require("../сlasses/User");
 var express = require('express');
 var router = express.Router();
 
-router.get('/', (req, res, next) => {
-    let userName = req.query.username;
-    let userHashAccess = req.query.hashaccess;
+router.get('/',async function (req, res, next) {
+    let userHash = req.cookies.userHash;
+    let sessionToken = req.cookies.sessionToken;
 
-    if (userName === undefined ||
-        userHashAccess === undefined) {
+    let logger = new Logger(true);
+
+    if (userHash === undefined ||
+        sessionToken === undefined) {
         // If not all parameters were recieved send response, and stop saving file
         res.end(ResponseSamples.DefaultResponse("Not all parameters were recieved", StatusCodes.NOT_ALL_PARAMETERS_WERE_RECIEVED));
         return;
@@ -19,12 +21,13 @@ router.get('/', (req, res, next) => {
 
     // Check is user exist and logindata correct
     try {
-        let dbWork = new DBWork();
-        let user = new User(userName, userHashAccess, dbWork);
+        await LCADatabase.Connect();
+        let user = new UserWithToken(userHash, sessionToken, LCADatabase);
 
-        user.Login();
+        await user.Login();
         let userData = user.GetUserData();
 
+        await LCADatabase.CloseConnection();
         res.end(ResponseSamples.ToUserUserData(userData, StatusCodes.SUCCESFUL_GETTED_USER_DATA));
         return;
     }

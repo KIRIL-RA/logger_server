@@ -4,21 +4,19 @@ const StatusCodes = require("../static/StatusCodes.json");
 const { GetAnalytics } = require("../сlasses/Logic");
 const Logger = require('../сlasses/Logger');
 const { DBWork, LCADatabase } = require('../сlasses/DBWork');
-const User = require("../сlasses/User");
+const { UserWithToken } = require("../сlasses/User");
 var express = require('express');
 var router = express.Router();
 
 router.get('/:year/:month/:date', async function (req, res, next) {
-    let userName = req.query.username;
-    let userPassword = req.query.password;
+    let userHash = req.cookies.userHash;
+    let sessionToken = req.cookies.sessionToken;
     let deviceId = req.query.deviceid;
     let date = { year: req.params.year, month: req.params.month, day: req.params.date };
 
     let logger = new Logger(true);
 
-    if (userName === undefined ||
-        userPassword === undefined ||
-        deviceId === undefined) {
+    if (deviceId === undefined) {
         // If not all parameters were recieved send response, and stop saving file
         res.end(ResponseSamples.DefaultResponse("Not all parameters were recieved", StatusCodes.NOT_ALL_PARAMETERS_WERE_RECIEVED));
         return;
@@ -27,23 +25,17 @@ router.get('/:year/:month/:date', async function (req, res, next) {
     try {
         await LCADatabase.Connect();
         // Trying to get analytics for choosed period 
-        let user = new User(userName, userPassword, LCADatabase);
+        let user = new UserWithToken(userHash, sessionToken, LCADatabase);
 
         await user.Login();
 
+        let userData = user.GetUserData();
+        console.log(userData);
         let deviceData = user.GetDeviceData(parseInt(deviceId));
-        GetAnalytics(user.userData.userHash, deviceData.id, date)
-            .then(async function(result) {
-                await LCADatabase.CloseConnection();
-                res.end(ResponseSamples.ToUserAnalyticsResult(deviceData, result, StatusCodes.ANALYTICS_SUCCESFUL_SENDED));
-            })
-            .catch(e => {
-                switch (e.name) {
-                    default:
-                        res.end(ResponseSamples.DefaultResponse("Error get analytics", StatusCodes.GET_ANALYTICS_ERROR));
-                        return;
-                }
-            });
+        let result = await GetAnalytics(userData.userHash, deviceData.id, date);
+
+        await LCADatabase.CloseConnection();
+        res.end(ResponseSamples.ToUserAnalyticsResult(deviceData, result, StatusCodes.ANALYTICS_SUCCESFUL_SENDED));
     }
 
     catch (e) {

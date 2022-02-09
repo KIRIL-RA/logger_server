@@ -74,8 +74,48 @@ class User {
     }
 }
 
-class UserWithToke{
-    
+class UserWithToken extends User{
+    constructor(userHash, sessionToken, dbWork){
+        if (userHash === undefined || sessionToken === undefined || dbWork === undefined) throw new NotAllParametersWereRecievedError("You must specify all parameters");
+        if (userHash === null || sessionToken === null || dbWork === null) throw new NotAllParametersWereRecievedError("You must specify all parameters");
+
+        super(dbWork);
+
+        this.userData = {
+            userHash: userHash,
+            sessionToken: sessionToken
+        };
+    }
+
+    async Login(){
+        let isTokenValid = false;
+        let dbWork = this.dbWork;
+        try{
+            let userData = await dbWork.GetUserData({userHash: this.userData.userHash});
+            
+            userData.activeSessions.forEach(validSessionToken => {
+                if(validSessionToken == this.userData.sessionToken) isTokenValid=true;
+            });
+            
+            if (!isTokenValid) throw new UserLoginDataIncorrectError("User login failed, data incorrected");
+            this.userData = userData;
+            this.isUserLogined = true;
+
+            return userData;
+        }
+        catch (e) {
+            switch (e.name) {
+                case new UserNotFoundError().name:
+                    throw new UserLoginDataIncorrectError("User not found");
+
+                case new UserLoginDataIncorrectError().name:
+                    throw new UserLoginDataIncorrectError("User login failed, data incorrected");
+
+                default:
+                    throw "User login failed, uncaught error";
+            }
+        }
+    }
 }
 
 class UserWithPassword extends User {
@@ -100,7 +140,7 @@ class UserWithPassword extends User {
     async Login() {
         let dbWork = this.dbWork;
         try {
-            let userData = await dbWork.GetUserData(this.userData.userName);
+            let userData = await dbWork.GetUserData({userName: this.userData.userName});
             
             if (userData.userName !== this.userData.userName || userData.password !== this.userData.password) throw new UserLoginDataIncorrectError("User login failed, data incorrected");
             this.userData = userData;
@@ -151,4 +191,4 @@ class UserWithPassword extends User {
     }
 }
 
-module.exports = { UserWithPassword };
+module.exports = { UserWithPassword, UserWithToken };
