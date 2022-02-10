@@ -9,24 +9,17 @@ const DataOnPage = {
 let statusCodes = {};
 let devices = {};
 
-// Get data to login
-let userName = localStorage.getItem("userName");
-let hashAccess = localStorage.getItem("hashAccess");
-
-// If data to login not exist, redirect user to login page
-if (hashAccess === null || userName === null) Redirect.ToLoginPage();
-
 $(document).ready(() => onLoaded());
 
 async function onLoaded() {
-    DataOnPage.SetUsername(userName);
+    let response = {};
+
     $('select').change(() => DataChanged());
 
     statusCodes = await Requests.StatusCodes();
-    let response = {};
 
     try {
-        response = await Requests.GetDataForSelect(userName, hashAccess);
+        response = await Requests.GetDataForSelect();
         devices = response.devices;
     }
     catch {
@@ -41,7 +34,6 @@ async function onLoaded() {
 
         case statusCodes.USER_LOGIN_ERROR:
             // If user not logined, clear incorrect login data and redirect him to login page
-            ClearLocalStorage.LoginData();
             Redirect.ToLoginPage();
             break;
 
@@ -50,6 +42,8 @@ async function onLoaded() {
             alert("Unknown error");
             break;
     }
+    
+    await SetUsername();
 }
 
 function FillSelect(devices) {
@@ -111,4 +105,12 @@ function CalendarClickedItem(day){
     day = parseInt(day);
 
     Redirect.ToShowAnalytics(year, month, day, deviceId);
+}
+
+async function SetUsername(){
+    let response = {};
+
+    response = await Requests.GetUserData();
+    userData = response.userData;
+    DataOnPage.SetUsername(userData.userName);
 }

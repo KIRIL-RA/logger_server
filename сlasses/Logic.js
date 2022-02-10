@@ -26,7 +26,7 @@ class Logic {
         return existLogs;
     }
 
-    static async GetAnalytics(userHash, deviceId, date) {
+    static async GetSimpleAnalytics(userHash, deviceId, date) {
         let makeGraphPoints = 30; // Make graph control points every 30 minutes of log
         let year = date.year;
         let month = date.month;

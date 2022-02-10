@@ -13,7 +13,7 @@ var router = express.Router();
 /**
  * Check synchronized files
  */
-router.post('/', (req, res, next) => {
+router.post('/',async function (req, res, next) {
     let fileNames = req.body.fileNames;
     let deviceId = req.query.deviceId;
     let deviceHashAccess = req.query.devicehashaccess;
@@ -31,10 +31,10 @@ router.post('/', (req, res, next) => {
     try {
         // Trying to check file synchronization
 
-        LCADatabase.Connect();
+        await LCADatabase.Connect();
         let device = new Device(parseInt(deviceId), deviceHashAccess, LCADatabase);
 
-        device.Login();
+        await device.Login();
 
         let fileNamesToSync = new Set();
 
@@ -44,6 +44,7 @@ router.post('/', (req, res, next) => {
 
         fileNamesToSync = Array.from(fileNamesToSync);
 
+        await LCADatabase.CloseConnection();
         // If synchronization check succesful, send message
         res.end(ResponseSamples.ToLoggerDeviceFilesToSync(fileNamesToSync, StatusCodes.SYNC_SUCCESS));
         return;

@@ -26,21 +26,15 @@ const DataOnPage = {
 $(document).ready(() => onLoaded()); // When document loaded, start main action
 
 async function onLoaded() {
-
     statusCodes = await Requests.StatusCodes();
-    // Get data to login
-    let userName = localStorage.getItem("userName");
-    let hashAccess = localStorage.getItem("hashAccess");
-
-    if (hashAccess === undefined || userName === undefined) Redirect.ToLoginPage(); // If login data not found, redirect user to login page
-    DataOnPage.SetUsername(userName); // Show user name
 
     let date = GetDateFromURL(urlString);
     let analizedData;
 
     try {
+        await SetUsername();
         // Trying to get analized data
-        analizedData = await Requests.AnalizedData(date, userName, hashAccess, deviceId);
+        analizedData = await Requests.AnalizedData(date, deviceId);
     }
     catch (e) {
         // If error catched, setting error status code
@@ -60,7 +54,6 @@ async function onLoaded() {
 
         case statusCodes.USER_LOGIN_ERROR:
             // If user not logined, clear incorrect login data and redirect him to login page
-            ClearLocalStorage.LoginData();
             Redirect.ToLoginPage();
             break;
 
@@ -192,4 +185,12 @@ function DrawGraph(graphPoints) {
     catch{
         alert("Error draw graph");
     }
+}
+
+async function SetUsername(){
+    let response = {};
+
+    response = await Requests.GetUserData();
+    userData = response.userData;
+    DataOnPage.SetUsername(userData.userName);
 }

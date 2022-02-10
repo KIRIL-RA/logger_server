@@ -1,7 +1,7 @@
 var { SaveFilesFromRequest } = require("../сlasses/File");
 var express = require('express');
 var multer = require('multer');
-const DBWork = require('../сlasses/DBWork');
+const {DBWork, LCADatabase} = require('../сlasses/DBWork');
 const Logger = require('../сlasses/Logger');
 const Device = require('../сlasses/Device');
 const ResponseSamples = require("../сlasses/ResponseSamples");
@@ -29,7 +29,7 @@ var upload = multer({ storage: storageConfig, fileFilter: fileFilter })
 /**
  * Receiving post requests with files.
  */
-router.post('/', upload.array('avatar'), function (req, res, next) {
+router.post('/', upload.array('avatar'), async function (req, res, next) {
     let files = req.files;
     let deviceId = req.query.deviceId;
     let deviceHashAccess = req.query.devicehashaccess;
@@ -52,14 +52,16 @@ router.post('/', upload.array('avatar'), function (req, res, next) {
     try {
         // Trying to save uploaded file
 
-        let dbWork = new DBWork();
-        let device = new Device(parseInt(deviceId), deviceHashAccess, dbWork);
+        await LCADatabase.Connect();
+        let device = new Device(parseInt(deviceId), deviceHashAccess, LCADatabase);
 
-        device.Login();
+        await device.Login();
         SaveFilesFromRequest(`uploads/${device.deviceData.ownerHash}/devices/${deviceId}/`, files, true);
 
         // If saving succesful send message about succesful saving
         logger.LogSucces(`Files succesful recieved and saved. User: ${device.deviceData.ownerName}, deviceid: ${deviceId}`);
+        await LCADatabase.CloseConnection();
+
         res.end(ResponseSamples.DefaultResponse('Files succesful recieved and save', StatusCodes.FILE_RECIEVED_AND_SAVED_SUCCESFUL)); // Send response to client
         return;
     }

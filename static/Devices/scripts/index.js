@@ -9,17 +9,9 @@ const DataOnPage = {
     SetUsername: (userName) => $("#USERNAME").text(userName)
 };
 
-// Get data to login
-let userName = localStorage.getItem("userName");
-let hashAccess = localStorage.getItem("hashAccess");
-
-// If data to login not exist, redirect user to login page
-if (hashAccess === null || userName === null) Redirect.ToLoginPage();
-
 $(document).ready(() => onLoaded());
 
 async function onLoaded() {   
-    DataOnPage.SetUsername(userName);
 
     statusCodes = await Requests.StatusCodes();
     let response = {};
@@ -27,7 +19,7 @@ async function onLoaded() {
 
     // Trying to get data about user devices
     try {
-        response = await Requests.GetUserData(userName, hashAccess);
+        response = await Requests.GetUserData();
         userData = response.userData;
     }
     catch {
@@ -35,6 +27,7 @@ async function onLoaded() {
         response = { statusCode: statusCodes.ERROR_GET_USER_DATA };
     }
 
+    await SetUsername();
     switch (response.statusCode) {
         case statusCodes.SUCCESFUL_GETTED_USER_DATA:
             ShowDevices(userData);
@@ -60,4 +53,13 @@ function ShowDevices(userData) {
     let devices = userData.devices;
 
     devices.forEach(device => DataOnPage.AddDevice(device.id, device.name));
+}
+
+
+async function SetUsername(){
+    let response = {};
+
+    response = await Requests.GetUserData();
+    userData = response.userData;
+    DataOnPage.SetUsername(userData.userName);
 }

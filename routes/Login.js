@@ -32,7 +32,7 @@ router.get('/', async function (req, res, next) {
         
         res.cookie('sessionToken', userData.sessionToken, { maxAge: 900000, httpOnly: true });
         res.cookie('userHash', userData.userHash, { maxAge: 900000, httpOnly: true });
-        res.end(ResponseSamples.DefaultResponse("Sucessfully logined", StatusCodes.USER_LOGINED_SUCCESSFUL_WITH_PASSWORD));
+        res.end(ResponseSamples.DefaultResponse("Sucessfully logined", StatusCodes.USER_LOGIN_SUCCESFUL));
         return;
     }
 

@@ -56,8 +56,6 @@ async function CheckIsLoginDataCorrect(userName, hashAccess) {
 
         case statusCodes.USER_LOGIN_SUCCESFUL:
             // If user succesful logined, redirect him to page about him
-            localStorage.setItem("userName", userName);
-            localStorage.setItem("hashAccess", hashAccess);
             Redirect.ToUserInfoPage();
             break;
 

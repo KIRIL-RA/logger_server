@@ -6,13 +6,6 @@ const DataOnPage = {
     }
 };
 
-// Get data to login
-let userName = localStorage.getItem("userName");
-let hashAccess = localStorage.getItem("hashAccess");
-
-// If data to login not exist, redirect user to login page
-if (hashAccess === null || userName === null) Redirect.ToLoginPage();
-
 $(document).ready(() => onLoaded());
 
 async function onLoaded() {
@@ -23,7 +16,7 @@ async function onLoaded() {
     let userData = {};
 
     try{
-        response = await Requests.GetUserData(userName, hashAccess);
+        response = await Requests.GetUserData();
         userData = response.userData;
     }
     catch{

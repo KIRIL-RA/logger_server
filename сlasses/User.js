@@ -72,9 +72,30 @@ class User {
 
         return userData;
     }
+
+    /**
+     * Change user device name 
+     * @param {number} id 
+     * @param {String} deviceName 
+     */
+    async RenameDevice(id, deviceName){
+        if (!this.isUserLogined) throw new UserNotLoginedError("User not logined");
+
+        let dbWork = this.dbWork;
+        this.GetDeviceData(id); // Check is device belongs to user. If not => call error and rename stoping
+
+        await dbWork.RenameDevice(this.userData.userHash, id, deviceName);
+    }
 }
 
 class UserWithToken extends User{
+
+    /**
+     * Actions with user. Login with session token.
+     * @param {String} userHash 
+     * @param {String} sessionToken 
+     * @param {DBWork} dbWork 
+     */
     constructor(userHash, sessionToken, dbWork){
         if (userHash === undefined || sessionToken === undefined || dbWork === undefined) throw new NotAllParametersWereRecievedError("You must specify all parameters");
         if (userHash === null || sessionToken === null || dbWork === null) throw new NotAllParametersWereRecievedError("You must specify all parameters");
@@ -87,6 +108,11 @@ class UserWithToken extends User{
         };
     }
 
+    /**
+     * Login user. 
+     * Checks correct of login data.
+     * @returns User data.
+     */
     async Login(){
         let isTokenValid = false;
         let dbWork = this.dbWork;
@@ -95,7 +121,7 @@ class UserWithToken extends User{
             
             userData.activeSessions.forEach(validSessionToken => {
                 if(validSessionToken == this.userData.sessionToken) isTokenValid=true;
-            });
+            }); // Check is session token is valid 
             
             if (!isTokenValid) throw new UserLoginDataIncorrectError("User login failed, data incorrected");
             this.userData = userData;
@@ -116,10 +142,17 @@ class UserWithToken extends User{
             }
         }
     }
+
 }
 
 class UserWithPassword extends User {
 
+    /**
+     * Action with user. Login with user name and password
+     * @param {String} userName 
+     * @param {String} password 
+     * @param {DBWork} dbWork 
+     */
     constructor(userName, password, dbWork) {
         if (userName === undefined || password === undefined || dbWork === undefined) throw new NotAllParametersWereRecievedError("You must specify all parameters");
         if (userName === null || password === null || dbWork === null) throw new NotAllParametersWereRecievedError("You must specify all parameters");

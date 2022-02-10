@@ -15,18 +15,18 @@ const Redirect = {
 
 // Request samples
 const Requests = {
-    AnalizedData: async (date, userName, hashAccess, deviceId) =>
-        fetch(`/getanalytics/${date.year}/${date.month}/${date.day}?username=${userName}&hashaccess=${hashAccess}&deviceid=${deviceId}`).then(response => response.ok ? response.json() : (() => { throw "Error parse response"; })()),
+    AnalizedData: async (date, deviceId) =>
+        fetch(`/getanalytics/${date.year}/${date.month}/${date.day}?deviceid=${deviceId}`).then(response => response.ok ? response.json() : (() => { throw "Error parse response"; })()),
 
     StatusCodes: async () =>
         fetch("/StatusCodes.json").then(response => response.ok ? response.json() : (() => { throw "Error parse response"; })()),
 
-    IsLoginDataCorrect: async (userName, hashAccess) =>
-        fetch(`/isuserlogindatacorrect?username=${userName}&hashaccess=${hashAccess}`).then(response => response.ok ? response.json() : (() => { throw "Error parse response"; })()),
+    IsLoginDataCorrect: async (userName, password) =>
+        fetch(`/createsessiontoken?username=${userName}&password=${password}`).then(response => response.ok ? response.json() : (() => { throw "Error parse response"; })()),
 
-    GetUserData: async (userName, hashAccess) =>
-        fetch(`/getuserinfo?username=${userName}&hashaccess=${hashAccess}`).then(response => response.ok ? response.json() : (() => { throw "Error parse response"; })()),
+    GetUserData: async () =>
+        fetch(`/getuserinfo`).then(response => response.ok ? response.json() : (() => { throw "Error parse response"; })()),
 
-    GetDataForSelect: async (userName, hashAccess) =>
-        fetch(`/getinfochoise?username=${userName}&hashaccess=${hashAccess}`).then(response => response.ok ? response.json() : (() => { throw "Error parse response"; })())
+    GetDataForSelect: async () =>
+        fetch(`/getinfochoise`).then(response => response.ok ? response.json() : (() => { throw "Error parse response"; })())
 };

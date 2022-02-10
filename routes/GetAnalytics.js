@@ -1,7 +1,7 @@
 const { UserLoginDataIncorrectError, UserNotFoundError } = require("../сlasses/Exceptions/UserExceptions");
 const ResponseSamples = require("../сlasses/ResponseSamples");
 const StatusCodes = require("../static/StatusCodes.json");
-const { GetAnalytics } = require("../сlasses/Logic");
+const { GetSimpleAnalytics } = require("../сlasses/Logic");
 const Logger = require('../сlasses/Logger');
 const { DBWork, LCADatabase } = require('../сlasses/DBWork');
 const { UserWithToken } = require("../сlasses/User");
@@ -15,6 +15,13 @@ router.get('/:year/:month/:date', async function (req, res, next) {
     let date = { year: req.params.year, month: req.params.month, day: req.params.date };
 
     let logger = new Logger(true);
+    
+    if (userHash === undefined ||
+        sessionToken === undefined) {
+        // If authentication parameters not recieved, send error response
+        res.end(ResponseSamples.DefaultResponse("Login data not recieved", StatusCodes.USER_LOGIN_ERROR));
+        return;
+    }
 
     if (deviceId === undefined) {
         // If not all parameters were recieved send response, and stop saving file
@@ -30,9 +37,9 @@ router.get('/:year/:month/:date', async function (req, res, next) {
         await user.Login();
 
         let userData = user.GetUserData();
-        console.log(userData);
+
         let deviceData = user.GetDeviceData(parseInt(deviceId));
-        let result = await GetAnalytics(userData.userHash, deviceData.id, date);
+        let result = await GetSimpleAnalytics(userData.userHash, deviceData.id, date);
 
         await LCADatabase.CloseConnection();
         res.end(ResponseSamples.ToUserAnalyticsResult(deviceData, result, StatusCodes.ANALYTICS_SUCCESFUL_SENDED));

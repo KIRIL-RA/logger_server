@@ -26,20 +26,21 @@ class Device{
      */
     CheckDeviceHasOwner(){
         if(!this.isDeviceLogined) throw new DeviceNotLoginedError("Device not logined");
-        if(this.deviceData.ownerHash === undefined || this.deviceData.ownerHash === null) throw new DeviceHasNoOwnerError("Owner not found");
+        if(this.deviceData.ownerHash === undefined || this.deviceData.ownerHash === null) return false;
+        return true;
     }
 
     /**
      * Check login data.
      */
-    Login(){
+    async Login(){
         let dbWork = this.dbWork;
         try{
-            let deviceData = dbWork.GetDeviceData(this.deviceData.id);
+            let deviceData = await dbWork.GetDeviceData({id: this.deviceData.id});
             if(deviceData.id !== this.deviceData.id || deviceData.hashAccess !== this.deviceData.hashAccess) throw new DeviceLoginDataIncorrectError("Device login data error");
             this.deviceData = deviceData;
             this.isDeviceLogined = true;
-            this.CheckDeviceHasOwner();
+            if(!this.CheckDeviceHasOwner()) throw new DeviceHasNoOwnerError("Owner not found");
         }
         catch(e){
             switch(e){

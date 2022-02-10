@@ -17,8 +17,8 @@ router.get('/', async function (req, res, next) {
 
     if (userHash === undefined ||
         sessionToken === undefined) {
-        // If not all parameters were recieved send response, and stop saving file
-        res.end(ResponseSamples.DefaultResponse("Not all parameters were recieved", StatusCodes.NOT_ALL_PARAMETERS_WERE_RECIEVED));
+        // If authentication parameters not recieved, send error response
+        res.end(ResponseSamples.DefaultResponse("Login data not recieved", StatusCodes.USER_LOGIN_ERROR));
         return;
     }
 

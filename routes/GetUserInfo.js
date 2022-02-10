@@ -3,6 +3,7 @@ const ResponseSamples = require("../сlasses/ResponseSamples");
 const StatusCodes = require("../static/StatusCodes.json");
 const { DBWork, LCADatabase } = require('../сlasses/DBWork');
 const { UserWithToken } = require("../сlasses/User");
+const Logger = require('../сlasses/Logger');
 var express = require('express');
 var router = express.Router();
 
@@ -15,7 +16,7 @@ router.get('/',async function (req, res, next) {
     if (userHash === undefined ||
         sessionToken === undefined) {
         // If not all parameters were recieved send response, and stop saving file
-        res.end(ResponseSamples.DefaultResponse("Not all parameters were recieved", StatusCodes.NOT_ALL_PARAMETERS_WERE_RECIEVED));
+        res.end(ResponseSamples.DefaultResponse("Login data not recieved", StatusCodes.USER_LOGIN_ERROR));
         return;
     }
 

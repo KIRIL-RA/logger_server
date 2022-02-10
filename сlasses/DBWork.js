@@ -3,21 +3,6 @@ const { UserNotFoundError } = require("./Exceptions/UserExceptions");
 const { NotAllParametersWereRecievedError } = require("./Exceptions/CommonExceptions");
 const MongoClient = require("mongodb").MongoClient;
 
-let users = [{
-    userHash: "a1b2c3",
-    userName: "testUser",
-    password: "testPassword",
-    hashAccess: "aabbccdd",
-    devices: [{ name: "Stanok 1-1", id: 401 }]
-}];
-
-let devices = [{
-    id: 401,
-    hashAccess: "aaabbb",
-    ownerName: "testUser",
-    ownerHash: "a1b2c3"
-}];
-
 /**
  * Access to db information.
  */
@@ -47,6 +32,11 @@ class DBWork {
         throw new UserNotFoundError("User not founded in DB"); // If use not exist, throw error.
     }
 
+    /**
+     * Adding user session token to data base
+     * @param {String} userHash 
+     * @param {String} sessionToken 
+     */
     async AddNewUserSession(userHash, sessionToken) {
         if ((userHash == undefined || sessionToken == undefined) || (userHash == undefined || sessionToken == undefined)) throw new NotAllParametersWereRecievedError("Not all parameters were recieved"); // Check,  is all parameters were recieved
 
@@ -56,44 +46,60 @@ class DBWork {
     }
 
     /**
-     * Searching user in DB.
-     * @param {string} userName 
-     * @returns User data if user exist.
+     * Adding short analytic result to data base
+     * @param {number} deviceId 
+     * @param {String} userHash 
+     * @param {any} result 
      */
-    GetUserDataDB(userName) {
-        let userExist = false;
-        let userData;
+    async AddFileAnalytics(deviceId, userHash, result){
+        if((deviceId === undefined || userHash === userHash || result === undefined)||(deviceId === null || userHash === null || result === null)) throw new NotAllParametersWereRecievedError("Not all parameters were recieved");
 
-        /*    Replace for DB request     */
-        users.forEach(user => {
-            if (user.userName === userName) {
-                userData = user;
-                userExist = true;
-            }
-        });
-        /*                               */
-
-        if (userExist) return userData; // If user exist, return information of user.
-        throw new UserNotFoundError("User not founded in DB"); // If use not exist, throw error.
+        const datataBase = this.mongoClient.db("LCA");
+        const collection = datataBase.collection("LIGHT_ANALYTICS_RESULT");
+        await collection.insertOne({deviceId: deviceId, userHash: userHash, resilt: result});
     }
 
     /**
-     * Searchin device in DB.
+     * Change user device name
+     * @param {String} userHash 
+     * @param {number} deviceId 
+     * @param {String} deviceName 
+     */
+    async RenameDevice(userHash, deviceId, deviceName){
+        if((deviceId === undefined || userHash === undefined || deviceName === undefined)||(deviceId === null || userHash === null || deviceName === null)) throw new NotAllParametersWereRecievedError("Not all parameters were recieved");
+
+        // Searching user in data base
+        const datataBase = this.mongoClient.db("LCA");
+        const collection = datataBase.collection("USERS");
+        let userData = await collection.findOne({ userHash: userHash, devices:{$elemMatch:  {id: deviceId}} });
+        let devices = userData.devices;
+
+        // Searching device in array
+        let deviceNumber;
+        for(let device = 0; device < devices.length; device++) if(devices[device].id == deviceId) deviceNumber = device; 
+
+        // Rename device
+        let toUpdate = {};
+        toUpdate[`devices.${String(deviceNumber)}.name`] = deviceName;
+        await collection.updateOne({ userHash: userHash}, {$set: toUpdate});
+    }
+
+    /**
+     * Searching device in DB.
      * @param {number} id Device id.
      * @param Device data
      */
-    GetDeviceData(id) {
+    async GetDeviceData(searchParameters) {
         let deviceExist = false;
         let deviceData;
 
-        /*    Replace for DB request     */
-        devices.forEach(device => {
-            if (device.id === id) {
-                deviceData = device;
-                deviceExist = true;
-            }
-        });
-        /*                               */
+        const datataBase = this.mongoClient.db("LCA");
+        const collection = datataBase.collection("DEVICES");
+        const results = await collection.find(searchParameters).toArray();
+        if (results.length != 0) {
+            deviceExist = true;
+            deviceData = results[0];
+        }
 
         if (deviceExist) return deviceData;
         throw new DeviceNotExistError("Device not found in db");
